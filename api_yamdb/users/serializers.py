@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
+
     email = serializers.EmailField(required=True)
     username = serializers.SlugRelatedField(required=True,
                                             slug_field="username")
@@ -22,7 +23,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        user = User.objects.create_user(
+        user = User.objects.get_or_create(
             validated_data['username'],
             validated_data['email'],
         )
