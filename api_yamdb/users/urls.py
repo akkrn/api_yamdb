@@ -6,8 +6,7 @@ app_name = "users"
 
 router = DefaultRouter()
 
-router.register(
-    r"posts/(?P<post_id>\d+)/comments", ..., basename="comments")
+router.register(r"posts/(?P<post_id>\d+)/comments", ..., basename="comments")
 
 urlpatterns = [
     path("", include(router.urls)),
