@@ -6,7 +6,7 @@ class Category(models.Model):
     slug = models.SlugField(max_length=50, unique=True)
 
     def __str__(self):
-        return self.name
+        return self.slug
 
 
 class Genre(models.Model):
@@ -14,23 +14,23 @@ class Genre(models.Model):
     slug = models.SlugField(max_length=50, unique=True)
 
     def __str__(self):
-        return self.name
+        return self.slug
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=256)
     year = models.IntegerField()
-    description = models.TextField()
-    rating = models.IntegerField()
+    description = models.TextField(blank=True)
+    rating = models.IntegerField(blank=True)
     genre = models.ForeignKey(
-        Genre, blank=True, null=True,
+        Genre, null=True,
         on_delete=models.SET_NULL,
         related_name='genres',
         verbose_name='Жанр',
         help_text='Жанр, к которому будет относиться релиз'
     )
     category = models.ForeignKey(
-        Category, blank=True, null=True,
+        Category, null=True,
         on_delete=models.SET_NULL,
         related_name='categories',
         verbose_name='Категория',

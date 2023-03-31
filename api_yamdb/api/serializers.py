@@ -3,13 +3,28 @@ from rest_framework import serializers
 
 from reviews.models import Title, Category, Genre
 
-# CATEGORY_CHOICES = Category.objects.all()
-# GENRE_CHOICES = Genre.objects.all()
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('name', 'slug')
+        model = Category
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('name', 'slug')
+        model = Genre
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    # genre = serializers.ChoiceField(choices=GENRE_CHOICES)
-    # category = serializers.ChoiceField(choices=CATEGORY_CHOICES)
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all()
+    )
 
     class Meta:
         fields = '__all__'
@@ -21,14 +36,12 @@ class TitleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Проверьте год рождения!')
         return value
 
+    def validate_category(self, value):
+        if str(Category.objects.filter(slug=value).last().slug) == str(value):
+            return value
+        raise serializers.ValidationError('Категории не существует')
 
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = '__all__'
-        model = Category
-
-
-class GenreSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = '__all__'
-        model = Genre
+    def validate_genre(self, value):
+        if str(Genre.objects.filter(slug=value).last().slug) == str(value):
+            return value
+        raise serializers.ValidationError('Жанра не существует')
