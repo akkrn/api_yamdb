@@ -26,3 +26,6 @@ class User(AbstractUser):
                 fields=["username", "email"], name="unique_user"
             )
         ]
+
+    def __str__(self):
+        return self.username
