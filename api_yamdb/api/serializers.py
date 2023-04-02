@@ -16,18 +16,41 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
-class TitleSerializer(serializers.ModelSerializer):
+class SlugDictRelatedField(serializers.SlugRelatedField):
+    def to_representation(self, obj):
+        result = {
+            "name": obj.name,
+            "slug": obj.slug
+        }
+        return result
+
+
+class TitleSerializerGet(serializers.ModelSerializer):
+    category = SlugDictRelatedField(
+        slug_field='slug', read_only=True)
+    genre = SlugDictRelatedField(
+        slug_field='slug', many=True, read_only=True)
+
+    class Meta:
+        fields = ('id', 'name', 'year', 'description', 'genre',
+                  'category', 'rating')
+        model = Title
+
+
+class TitleSerializerPost(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all()
     )
+
     genre = serializers.SlugRelatedField(
         slug_field='slug',
-        queryset=Genre.objects.all()
+        queryset=Genre.objects.all(), many=True
     )
 
     class Meta:
-        fields = '__all__'
+        fields = ('id', 'name', 'year', 'description', 'genre',
+                  'category', 'rating')
         model = Title
 
     def validate_year(self, value):
@@ -35,13 +58,3 @@ class TitleSerializer(serializers.ModelSerializer):
         if not value <= year:
             raise serializers.ValidationError('Проверьте год рождения!')
         return value
-
-    def validate_category(self, value):
-        if str(Category.objects.filter(slug=value).last().slug) == str(value):
-            return value
-        raise serializers.ValidationError('Категории не существует')
-
-    def validate_genre(self, value):
-        if str(Genre.objects.filter(slug=value).last().slug) == str(value):
-            return value
-        raise serializers.ValidationError('Жанра не существует')
