@@ -42,27 +42,6 @@ class MeView(RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
-
-# @api_view(['GET', 'PATCH'])
-# @permission_classes([IsAuthenticated])
-# def user_detail(request):
-#     user = request.user
-#
-#     if request.method == 'GET':
-#         serializer = UserMeSerializer(user)
-#         return Response(serializer.data)
-#
-#     elif request.method == 'PATCH':
-#         serializer = UserMeSerializer(user, data=request.data, partial=True)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         else:
-#             return Response(serializer.errors,
-#                             status=status.HTTP_400_BAD_REQUEST)
-#
-
-
 class SignupView(CreateAPIView):
     permission_classes = (AllowAny,)
 
