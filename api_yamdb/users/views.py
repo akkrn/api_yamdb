@@ -42,6 +42,7 @@ class MeView(RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
+
 class SignupView(CreateAPIView):
     permission_classes = (AllowAny,)
 
