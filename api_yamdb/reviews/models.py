@@ -23,14 +23,12 @@ class Title(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField()
     description = models.TextField(blank=True)
-    rating = models.IntegerField(blank=True)
-    genre = models.ForeignKey(
-        Genre, null=True,
-        on_delete=models.SET_NULL,
+    rating = models.IntegerField(blank=True, null=True, default=None)
+    genre = models.ManyToManyField(
+        Genre,
         related_name='genres',
-        verbose_name='Жанр',
-        help_text='Жанр, к которому будет относиться релиз'
-    )
+        verbose_name='Жанры',
+        help_text='Жанр, к которму будет относиться релиз')
     category = models.ForeignKey(
         Category, null=True,
         on_delete=models.SET_NULL,
