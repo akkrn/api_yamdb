@@ -1,11 +1,30 @@
-from rest_framework import filters, viewsets, permissions
-from django_filters.rest_framework import (DjangoFilterBackend, FilterSet,
-                                           CharFilter)
+from django_filters.rest_framework import (
+    CharFilter,
+    DjangoFilterBackend,
+    FilterSet,
+)
+from rest_framework import filters, mixins, viewsets
+from rest_framework.permissions import AllowAny
+from rest_framework.viewsets import GenericViewSet
 
-from reviews.models import Title, Category, Genre
-from .permissions import IsSafeOrReadOnly
-from .serializers import (TitleSerializerGet, TitleSerializerPost,
-                          CategorySerializer, GenreSerializer)
+from reviews.models import Category, Genre, Title
+from users.permissions import IsAdminOrRead
+
+from .serializers import (
+    CategorySerializer,
+    GenreSerializer,
+    TitleSerializerGet,
+    TitleSerializerPost,
+)
+
+
+class ListCreateDeleteView(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
+    pass
 
 
 class CategoryFilter(FilterSet):
@@ -14,39 +33,34 @@ class CategoryFilter(FilterSet):
 
     class Meta:
         model = Title
-        fields = ['name', 'year']
+        fields = ["name", "year"]
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    permission_classes = (IsSafeOrReadOnly,
-                          permissions.IsAuthenticatedOrReadOnly)
     filterset_class = CategoryFilter
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    permission_classes = (IsAdminOrRead,)
 
     def get_serializer_class(self):
-        actions = ['list', 'delete', 'retrieve']
+        actions = ["list", "delete", "retrieve"]
         if self.action in actions:
             return TitleSerializerGet
         else:
             return TitleSerializerPost
 
-
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(ListCreateDeleteView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsSafeOrReadOnly,
-                          permissions.IsAuthenticatedOrReadOnly)
-    lookup_field = 'slug'
-    search_fields = ('name',)
+    lookup_field = "slug"
+    search_fields = ("name",)
     filter_backends = (filters.SearchFilter,)
+    permission_classes = (IsAdminOrRead,)
 
-
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(ListCreateDeleteView):
     queryset = Genre.objects.all()
-    serializer_class = GenreSerializer
-    permission_classes = (IsSafeOrReadOnly,
-                          permissions.IsAuthenticatedOrReadOnly)
-    lookup_field = 'slug'
-    search_fields = ('name',)
+    lookup_field = "slug"
+    search_fields = ("name",)
     filter_backends = (filters.SearchFilter,)
+    serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrRead,)
