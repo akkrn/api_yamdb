@@ -10,7 +10,10 @@ from django.core.mail import send_mail
 from .models import User
 from .permissions import IsAdmin
 from .serializers import (
-    SignupSerializer, TokenSerializer, UserMeSerializer, UserSerializer,
+    SignupSerializer,
+    TokenSerializer,
+    UserMeSerializer,
+    UserSerializer,
 )
 
 
