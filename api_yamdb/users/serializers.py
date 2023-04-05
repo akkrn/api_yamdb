@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
         validators=[UniqueValidator(queryset=User.objects.all())],
     )
     username = serializers.RegexField(
-        regex="^[\w.@+-]+",
+        regex="^[\\w.@+-]+",
         max_length=150,
         required=True,
         validators=[UniqueValidator(queryset=User.objects.all())],
