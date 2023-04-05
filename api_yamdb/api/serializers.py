@@ -1,6 +1,7 @@
 import datetime as dt
 from django.shortcuts import get_object_or_404
 from django.forms import ValidationError
+from django.db.models import Avg
 
 from rest_framework import serializers
 
@@ -28,6 +29,11 @@ class SlugDictRelatedField(serializers.SlugRelatedField):
 class TitleSerializerGet(serializers.ModelSerializer):
     category = SlugDictRelatedField(slug_field="slug", read_only=True)
     genre = SlugDictRelatedField(slug_field="slug", many=True, read_only=True)
+    rating = serializers.SerializerMethodField()
+
+    def get_rating(self, obj):
+        rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
+        return rating if not rating else round(rating, 0)
 
     class Meta:
         fields = (
