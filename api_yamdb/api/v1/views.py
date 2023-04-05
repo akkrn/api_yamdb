@@ -1,15 +1,14 @@
 from django_filters.rest_framework import (
     CharFilter, DjangoFilterBackend, FilterSet,
 )
-from rest_framework import filters, mixins, permissions, viewsets
+from rest_framework import filters, mixins, viewsets
 from rest_framework.viewsets import GenericViewSet
 
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Genre, Review, Title
-from users.permissions import IsAdminOrRead
+from users.permissions import IsAdminModeratorAuthorOrReadOnly, IsAdminOrRead
 
-from .permissions import IsAdminModeratorAuthorOrReadOnly
 from .serializers import (
     CategorySerializer, CommentSerializer, GenreSerializer, ReviewSerializer,
     TitleSerializerGet, TitleSerializerPost,
@@ -68,10 +67,7 @@ class GenreViewSet(ListCreateDeleteView):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
-        IsAdminModeratorAuthorOrReadOnly,
-    )
+    permission_classes = (IsAdminModeratorAuthorOrReadOnly,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
@@ -84,10 +80,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
-        IsAdminModeratorAuthorOrReadOnly,
-    )
+    permission_classes = (IsAdminModeratorAuthorOrReadOnly,)
 
     def get_queryset(self):
         review = get_object_or_404(Review, id=self.kwargs.get("review_id"))

@@ -16,14 +16,14 @@ class IsAdmin(permissions.BasePermission):
 
 class IsAdminOrRead(DjangoObjectPermissions):
     def has_permission(self, request, view):
-        return bool(
+        return (
             request.method in permissions.SAFE_METHODS
             or request.user.is_authenticated
             and (request.user.role == "admin" or request.user.is_superuser)
         )
 
     def has_object_permission(self, request, view, obj):
-        return bool(
+        return (
             request.method in permissions.SAFE_METHODS
             or request.user.is_authenticated
             and (request.user.role == "admin" or request.user.is_superuser)
@@ -45,6 +45,21 @@ class IsModerator(permissions.BasePermission):
         )
 
 
-class Forbidden(permissions.BasePermission):
+class IsAdminModeratorAuthorOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
-        return False
+        return (
+            request.method in permissions.SAFE_METHODS
+            or request.user.is_authenticated
+        )
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if request.method == "POST":
+            return request.user.is_authenticated
+        return request.user.is_authenticated and (
+            request.user == obj.author
+            or request.user.role == "moderator"
+            or request.user.role == "admin"
+            or request.user.is_superuser
+        )
