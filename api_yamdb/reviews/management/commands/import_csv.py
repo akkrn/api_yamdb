@@ -1,9 +1,9 @@
 from csv import DictReader
 
 from django.core.management.base import BaseCommand
-from reviews.models import Category, Genre, Title, Review, Comment
-from users.models import User
 
+from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
 
 TABLES = {
     User: "users.csv",
@@ -20,7 +20,10 @@ class Command(BaseCommand):
     help = "Import from csv to db"
 
     def handle(self, *args, **kwargs):
-        for model, csv, in TABLES.items():
+        for (
+            model,
+            csv,
+        ) in TABLES.items():
             with open(f"./static/data/{csv}", encoding="utf-8") as file:
                 if model.objects.exists():
                     print("Data already loaded... Exiting.")

@@ -3,8 +3,8 @@ from django.db import models
 
 from .managers import CustomUserManager
 
-MODERATOR = 'moderator'
-ADMIN = 'admin'
+MODERATOR = "moderator"
+ADMIN = "admin"
 
 
 class User(AbstractUser):
@@ -32,9 +32,7 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return any(
-            [self.role == ADMIN, self.is_superuser, self.is_staff]
-        )
+        return any([self.role == ADMIN, self.is_superuser, self.is_staff])
 
     @property
     def is_moderator(self):
