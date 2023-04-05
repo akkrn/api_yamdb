@@ -21,6 +21,7 @@ class IsAdminOrRead(DjangoObjectPermissions):
             or request.user.is_authenticated
             and (request.user.role == "admin" or request.user.is_superuser)
         )
+
     def has_object_permission(self, request, view, obj):
         return bool(
             request.method in permissions.SAFE_METHODS
