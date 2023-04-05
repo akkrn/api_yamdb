@@ -108,7 +108,14 @@ class ReviewSerializer(serializers.ModelSerializer):
         return score
 
     class Meta:
-        fields = "__all__"
+        fields = (
+            "id",
+            "author",
+            "title",
+            "score",
+            "text",
+            "pub_date",
+        )
         model = Review
 
 
@@ -119,5 +126,11 @@ class CommentSerializer(serializers.ModelSerializer):
     review = serializers.ReadOnlyField(source="review.id")
 
     class Meta:
-        fields = "__all__"
+        fields = (
+            "id",
+            "author",
+            "review",
+            "text",
+            "pub_date",
+        )
         model = Comment

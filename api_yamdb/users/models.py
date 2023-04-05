@@ -3,9 +3,6 @@ from django.db import models
 
 from .managers import CustomUserManager
 
-MODERATOR = "moderator"
-ADMIN = "admin"
-
 
 class User(AbstractUser):
     role_choices = [
@@ -29,14 +26,6 @@ class User(AbstractUser):
                 fields=["username", "email"], name="unique_user"
             )
         ]
-
-    @property
-    def is_admin(self):
-        return any([self.role == ADMIN, self.is_superuser, self.is_staff])
-
-    @property
-    def is_moderator(self):
-        return self.role == MODERATOR
 
     def __str__(self):
         return self.username
