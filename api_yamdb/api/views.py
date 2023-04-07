@@ -7,6 +7,7 @@ from rest_framework import filters, mixins, viewsets
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 from rest_framework import permissions
+from django.db.models import Avg
 
 from reviews.models import Category, Genre, Review, Title
 from users.permissions import IsAdminOrRead
@@ -41,7 +42,10 @@ class CategoryFilter(FilterSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.all().annotate(
+        Avg('reviews__score')).prefetch_related(
+        'category', 'genre'
+    )
     filterset_class = CategoryFilter
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     permission_classes = (IsAdminOrRead,)
@@ -82,7 +86,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             Title,
             id=self.kwargs.get('title_id')
         )
-        return title.reviews.all()
+        return title.reviews.all().prefetch_related('author')
 
     def perform_create(self, serializer):
         title = get_object_or_404(
@@ -105,7 +109,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             Review,
             id=self.kwargs.get('review_id')
         )
-        return review.comments.all()
+        return review.comments.all().prefetch_related('author')
 
     def perform_create(self, serializer):
         review = get_object_or_404(
