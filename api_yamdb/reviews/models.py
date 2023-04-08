@@ -70,12 +70,12 @@ class Review(models.Model):
         ordering = ("-pub_date",)
         constraints = [
             models.UniqueConstraint(
-                fields=["title", "author"], name="unique_relationships"
+                fields=["title", "author"], name="uq_author_title"
             ),
         ]
 
     def __str__(self):
-        return self.text
+        return self.text[:50]
 
 
 class Comment(models.Model):

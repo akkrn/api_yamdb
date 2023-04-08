@@ -1,8 +1,7 @@
 from django.contrib import admin
 
 from reviews.models import Category, Comment, Genre, Review, Title
-
-from .models import User
+from users.models import User
 
 admin.site.register(User)
 
@@ -42,7 +41,7 @@ class ReviewAdmin(admin.ModelAdmin):
 
 
 @admin.register(Comment)
-class ReviewAdmin(admin.ModelAdmin):
+class CommentAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "author",

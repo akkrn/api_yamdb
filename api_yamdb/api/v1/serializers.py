@@ -1,12 +1,95 @@
 import datetime as dt
 
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
-from django.db.models import Avg
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
+
+
+class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        max_length=254,
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+    )
+    username = serializers.RegexField(
+        regex="^[\\w.@+-]+",
+        max_length=150,
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+    )
+
+    class Meta:
+        fields = (
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "bio",
+            "role",
+        )
+        model = User
+        validators = [
+            UniqueTogetherValidator(
+                queryset=User.objects.all(),
+                fields=("username", "email"),
+                message="Такой пользователь уже существует",
+            ),
+        ]
+
+    def validate_username(self, value):
+        if value.lower() == "me":
+            raise serializers.ValidationError("Нельзя использовать такое имя!")
+        return value
+
+    def create(self, validated_data):
+        if self.is_valid():
+            user, created = User.objects.get_or_create(**validated_data)
+            user.save()
+        return user
+
+
+class UserMeSerializer(UserSerializer):
+    class Meta:
+        fields = (
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "bio",
+            "role",
+        )
+        model = User
+        read_only_fields = (
+            "id",
+            "role",
+        )
+
+
+class TokenSerializer(serializers.ModelSerializer):
+    username = serializers.CharField()
+    confirmation_code = serializers.CharField()
+
+    class Meta:
+        fields = (
+            "username",
+            "confirmation_code",
+        )
+        model = User
+
+
+class SignupSerializer(UserSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "email",
+            "username",
+        )
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -30,11 +113,12 @@ class SlugDictRelatedField(serializers.SlugRelatedField):
 class TitleSerializerGet(serializers.ModelSerializer):
     category = SlugDictRelatedField(slug_field="slug", read_only=True)
     genre = SlugDictRelatedField(slug_field="slug", many=True, read_only=True)
-    rating = serializers.SerializerMethodField()
-
-    def get_rating(self, obj):
-        rating = obj.reviews.aggregate(Avg("score")).get("score__avg")
-        return rating if not rating else round(rating, 0)
+    rating = serializers.IntegerField(
+        source="rating_avg",
+        read_only=True,
+        default=None,
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+    )
 
     class Meta:
         fields = (
